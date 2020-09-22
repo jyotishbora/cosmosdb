@@ -1,0 +1,159 @@
+# .NET Core yml template
+trigger:
+ branches:
+    include:
+      -  master
+
+pool:
+  name: Hosted Windows 2019 with VS2019
+  demands:
+  - msbuild
+  - visualstudio
+  - vstest
+  - java
+  
+name: '1.0.0.$(BuildCounter)'  #VERIFY AND UPDATE#
+  
+variables:
+  BuildConfiguration: 'Release'
+  BuildCounter: $[counter(variables['Build.BuildNumber'], 1)]
+  BuildPlatform: 'Any CPU' #VERIFY AND UPDATE#
+  DeployToEnvironment: 'NEWTEST' #VERIFY AND UPDATE#
+  framework: 'netcoreapp3.1' #VERIFY AND UPDATE#
+  nugetPackVersion: ''
+  NuGetAuthor: 'IAS'
+  NuGetDescription: '.NET Core Project'
+  revision: ''
+  FolderName: 'IAS.CosmosDB/src' #UPDATE#
+  ProjName: 'IAS.CosmosDB' #UPDATE
+  runtime: 'win10-x64' #NEWTEST #VERIFY AND UPDATE#
+  #runtime: 'win7-x64'  #TEST
+  SonarName: 'IAS.CosmosDB' #UPDATE
+
+
+steps:
+
+- powershell: |
+   $info = (Get-Content 'properties/AssemblyInfo.cs')
+   
+   Write-Host $info
+   
+   $matches = ([regex]'AssemblyFileVersion\("([^"]+)"\)').Matches($info)
+   $newBuildNumber = $matches[0].Groups[1].Value
+   
+   [String]$myrev = $Env:BUILD_BUILDNUMBER
+   $rev = $myrev.Substring($myrev.LastIndexOf('.') + 1)
+   $commitid = $Env:BUILD_SOURCEVERSION.Substring(0,8)
+   
+   Write-Host "##vso[task.setvariable variable=revision;]$rev"
+   
+   Write-Host "Build Number detected: " $newBuildNumber
+   $final = "$newBuildNumber.$rev+$commitid"
+   Write-Host $final
+   
+   Write-Host "##vso[task.setvariable variable=nugetPackVersion;]$final"
+   Write-Host "##vso[build.updatebuildnumber]$final"
+   
+  workingDirectory: '$(FolderName)'
+  displayName: 'Get AssemblyInfo script'
+
+- task: update-assembly-info@2
+  displayName: 'Update Assembly'
+  inputs:
+    assemblyInfoFiles: '$(FolderName)\**\*AssemblyInfo.*'
+    informationalVersion: '$(nugetPackVersion)'
+    fileVersionRevision: '$(revision)'
+    assemblyVersionRevision: '$(revision)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet restore'
+  inputs:
+    command: restore
+    projects: 'IAS.CosmosDB\*.sln'
+    vstsFeed: 'ce2b3d81-9dc3-4aac-89a0-62e8daa64826'
+ 
+- task: SonarCloudPrepare@1
+  displayName: 'Prepare analysis on SonarCloud'
+  inputs:
+    SonarCloud: SonarCloud
+    organization: ias
+    projectKey: '$(SonarName)'
+    projectName: '$(SonarName)'
+    extraProperties: |
+     # Additional properties that will be passed to the scanner, 
+     # Put one key=value per line, example:
+     # sonar.exclusions=**/*.bin
+     sonar.cs.vscoveragexml.reportsPaths=$(Agent.TempDirectory)/**/*.coveragexml
+     sonar.cs.vstest.reportsPaths=$(Agent.TempDirectory)/*/*.trx
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build_sln'
+  inputs:
+    projects: 'IAS.CosmosDB\*.sln'
+    arguments: '--configuration $(BuildConfiguration) --no-restore'
+
+- task: VSTest@2
+  displayName: 'VsTest - testAssemblies'
+  inputs:
+    testAssemblyVer2: |
+     IAS.CosmosDB\test\bin\$(BuildConfiguration)\$(framework)\$(ProjName).*test*.dll
+     !**\obj\**
+     !**\bin\$(BuildConfiguration)\$(framework)\*Integration*.dll
+    codeCoverageEnabled: true
+    testRunTitle: '$(ProjName).Tests'
+    platform: '$(BuildPlatform)'
+    configuration: '$(BuildConfiguration)'
+    diagnosticsEnabled: True
+  enabled: true #VSTest
+
+- task: SonarCloudAnalyze@1
+  displayName: 'Run Code Analysis'
+
+- task: SonarCloudPublish@1
+  displayName: 'Publish Quality Gate Result'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet publish'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: '$(FolderName)\*.csproj'
+    arguments: '--output bin\$(BuildConfiguration)\$(framework)\publish --framework $(framework) --runtime $(runtime) --configuration $(BuildConfiguration)'
+    zipAfterPublish: false
+    modifyOutputPath: false
+    workingDirectory: '$(FolderName)'
+  condition: and(Succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+
+- task: OctopusPack@3
+  displayName: 'Octopus Pack'
+  inputs:
+    PackageId: '$(ProjName)'
+    PackageVersion: '$(nugetPackVersion)'
+    SourcePath: '$(FolderName)\bin\$(BuildConfiguration)\$(framework)\publish'
+    OutputPath: '$(build.artifactstagingdirectory)'
+    NuGetAuthor: '$(NuGetAuthor)'
+    NuGetTitle: '$(ProjName)'
+    NuGetDescription: '$(NuGetDescription)'
+  condition: and(Succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+
+- task: PublishSymbols@2
+  displayName: 'Publish symbols path'
+  inputs:
+    SearchPattern: '\**\bin\**\*.pdb'
+    SymbolServerType: TeamServices
+  continueOnError: true
+
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+  inputs:
+    SourceFolder: '$(system.defaultworkingdirectory)'
+    Contents: '**\bin\$(BuildConfiguration)\**'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+  condition: and(Succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)'
+  condition: and(Succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+

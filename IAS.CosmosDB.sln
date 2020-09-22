@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30320.27
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Library", "Library", "{DAD5A7CC-12E6-4618-A1FF-11AE9F36804D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IAS.CosmosDB", "IAS.CosmosDB\src\IAS.CosmosDB.csproj", "{3289DC89-7158-4E42-8125-76E100B21853}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IasCosmosDBLibrary", "IasCosmosDBLibrary\src\IasCosmosDBLibrary.csproj", "{CFD32BDB-9B2F-4708-ACAB-967BB0532B4B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{EB0580C7-44E9-43E0-B742-EC8AFFA76BAA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IAS.CosmosDB.Unit.Tests", "IAS.CosmosDB\test\Unit\IAS.ComsosDB.Unit.Tests\IAS.CosmosDB.Unit.Tests.csproj", "{DF29FD74-19DF-49CB-94DC-ED12D8E4B305}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IAS.CosmosDB.Integration.Tests", "IAS.CosmosDB\test\Integration\IAS.CosmosDB.Integration.Tests\IAS.CosmosDB.Integration.Tests.csproj", "{63E11CBD-CB5C-46BB-9F80-D62693F650C0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3289DC89-7158-4E42-8125-76E100B21853}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3289DC89-7158-4E42-8125-76E100B21853}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3289DC89-7158-4E42-8125-76E100B21853}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3289DC89-7158-4E42-8125-76E100B21853}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFD32BDB-9B2F-4708-ACAB-967BB0532B4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFD32BDB-9B2F-4708-ACAB-967BB0532B4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFD32BDB-9B2F-4708-ACAB-967BB0532B4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFD32BDB-9B2F-4708-ACAB-967BB0532B4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF29FD74-19DF-49CB-94DC-ED12D8E4B305}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF29FD74-19DF-49CB-94DC-ED12D8E4B305}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF29FD74-19DF-49CB-94DC-ED12D8E4B305}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF29FD74-19DF-49CB-94DC-ED12D8E4B305}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63E11CBD-CB5C-46BB-9F80-D62693F650C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63E11CBD-CB5C-46BB-9F80-D62693F650C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63E11CBD-CB5C-46BB-9F80-D62693F650C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63E11CBD-CB5C-46BB-9F80-D62693F650C0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CFD32BDB-9B2F-4708-ACAB-967BB0532B4B} = {DAD5A7CC-12E6-4618-A1FF-11AE9F36804D}
+		{DF29FD74-19DF-49CB-94DC-ED12D8E4B305} = {EB0580C7-44E9-43E0-B742-EC8AFFA76BAA}
+		{63E11CBD-CB5C-46BB-9F80-D62693F650C0} = {EB0580C7-44E9-43E0-B742-EC8AFFA76BAA}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4D55879D-6EF4-4752-96D5-4B6BF5F8E8BB}
+	EndGlobalSection
+EndGlobal
